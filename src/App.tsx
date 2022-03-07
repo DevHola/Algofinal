@@ -3,32 +3,30 @@ import MyAlgoWallet, { SignedTx } from '@randlabs/myalgo-connect';
 import { useForm } from "react-hook-form";
 import algosdk from 'algosdk';
 import axios from 'axios';
-
-
+import FireBase from './firebaser';
+import {Form,Row,Nav,Tab,Col} from 'react-bootstrap'
+import Navbar from './screens/Navbarno'
+import Header from './screens/Header'
+import Footer from './screens/Footer'
+import Navbars from './screens/Ascreens/Navbars'
 const algodClient = new algosdk.Algodv2('', 'https://api.testnet.algoexplorer.io', '');
 const myAlgoWallet = new MyAlgoWallet();
 
 
 
-const txTypeOpts = [
-  {value: 'payment tx', name: 'Payment Transaction'},
-  {value: 'key reg tx', name: 'Key Registration Transaction'},
-  {value: 'asset config tx', name: 'Asset Configuration Transaction'},
-  {value: 'asset transfer tx', name: 'Asset Transfer Transaction'},
-  {value: 'asset freeze tx', name: 'Asset Freeze Transaction'},
-];
-
 
 
 function App() {
-
-  const { register, handleSubmit } = useForm();
-  
+  const { register, handleSubmit ,reset } = useForm();
+  let authToken = sessionStorage.getItem('Auth Token')
+  const transaction = [] as  any;
+  const [trans, settrans] = useState("");
+  const [grab,setgrab] = useState("")
   const [wallets, setWallets] = useState<string[]>();
   const [selectedWallet, setSelectedWallet] = useState<string>();
-
+  const database = FireBase.firestore();
   const [balance, setBalance] = useState<number>();
-  const [txType, setTxType] = useState<'payment tx' | 'key reg tx' | 'asset config tx' | 'asset transfer tx' | 'asset freeze tx'>('payment tx');
+  const txType = 'payment tx'
 
   const [isTxArray, setIsTxArray] = useState(false);
   const [totalTxArrayEl, setTotalTxArrayEl] = useState(2);
@@ -40,10 +38,9 @@ function App() {
       if(!selectedWallet) return;
 
       let accountInfo = await algodClient.accountInformation(selectedWallet).do();
-      console.log(accountInfo);
-
       const _balance = accountInfo.amount;
       setBalance(_balance);
+      fetchTrans()
 
     })();
   }, [selectedWallet]);
@@ -53,10 +50,9 @@ function App() {
   const connectToMyAlgo = async() => {
     try {
       const accounts = await myAlgoWallet.connect();
-      console.log(accounts);
+      
 
       const _wallets = accounts.map(account => account.address);
-  
       setWallets(_wallets);
       setSelectedWallet(_wallets[0]);
 
@@ -67,10 +63,27 @@ function App() {
   }
 
   
-
   const preparePaymentTx = async(formValue) => {
-    // let myAccount = algosdk.mnemonicToSecretKey('escape auto cool oil spy trap decrease doctor carbon wet token analyst stand rebuild drum mouse response track novel demand discover step hire able tissue');
-    // console.log('myAccount:', myAccount);
+    
+    let txn = await algodClient.getTransactionParams().do();
+
+    txn = {
+      ...txn,
+      ...formValue,
+      fee: 1000,
+      flatFee: true,
+      from: selectedWallet,
+      type: 'pay',
+      amount: +formValue.amount*1000000,
+      // note: formValue.note && algosdk.encodeObj(formValue.note)
+    };
+
+    if(txn.note) txn.note = new Uint8Array(Buffer.from(formValue.note));
+
+    return txn;
+  }
+  const preparePaymentTxx = async(formValue) => {
+    
     let txn = await algodClient.getTransactionParams().do();
 
     txn = {
@@ -90,90 +103,10 @@ function App() {
   }
 
 
-  const prepareKeyRegTx = async(formValue) => {
-    let txn = await algodClient.getTransactionParams().do();
-
-    txn = {
-      ...txn,
-      ...formValue,
-      fee: 1000,
-      flatFee: true,
-      from: selectedWallet,
-      type: 'keyreg',
-      voteFirst: +formValue.voteFirst,
-      voteLast: +formValue.voteLast,
-      voteKeyDilution: +formValue.voteKeyDilution,
-      // note: formValue.note && algosdk.encodeObj(formValue.note)
-    };
-
-    if(txn.note) txn.note = new Uint8Array(Buffer.from(formValue.note));
-
-    return txn;
-  };
 
 
-  const prepareAssetConfigTx = async(formValue) => {
-    let txn = await algodClient.getTransactionParams().do();
-
-    txn = {
-      ...txn,
-      ...formValue,
-      fee: 1000,
-      flatFee: true,
-      from: selectedWallet,
-      type: 'acfg',
-      assetDecimals: +formValue.assetDecimals,
-      assetTotal: +formValue.assetTotal,
-      assetIndex: formValue.assetIndex && +formValue.assetIndex,
-      // assetTotal: formValue.assetTotal*(10**formValue.assetDecimals),
-      // note: formValue.note && algosdk.encodeObj(formValue.note)
-    };
-
-    if(txn.note) txn.note = new Uint8Array(Buffer.from(formValue.note));
-
-    return txn;
-  }
 
 
-  const prepareAssetTransferTx = async(formValue) => {
-    let txn = await algodClient.getTransactionParams().do();
-
-    txn = {
-      ...txn,
-      ...formValue,
-        fee: 1000,
-        flatFee: true,
-        from: selectedWallet,
-        type: 'axfer',
-        amount: +formValue.amount,
-        assetIndex: +formValue.assetIndex,
-        // note: formValue.note && algosdk.encodeObj(formValue.note)
-    };
-
-    if(txn.note) txn.note = new Uint8Array(Buffer.from(formValue.note));
-
-    return txn;
-  }
-
-
-  const prepareAssetFreezeTx = async(formValue) => {
-    let txn = await algodClient.getTransactionParams().do();
-
-    txn = {
-      ...txn,
-      ...formValue,
-        fee: 1000,
-        flatFee: true,
-        from: selectedWallet,
-        type: 'afrz',
-        assetIndex: +formValue.assetIndex,
-        // note: formValue.note && algosdk.encodeObj(formValue.note)
-    };
-
-    if(txn.note) txn.note = new Uint8Array(Buffer.from(formValue.note));
-
-    return txn;
-  }
 
 
 
@@ -186,18 +119,11 @@ function App() {
 
       let txn: any;
 
-      if(txType === 'payment tx') txn = await preparePaymentTx(formValue);
-      else if(txType === 'key reg tx') txn = await prepareKeyRegTx(formValue);
-      else if(txType === 'asset config tx') txn = await prepareAssetConfigTx(formValue);
-      else if(txType === 'asset transfer tx') txn = await prepareAssetTransferTx(formValue);
-      else if(txType === 'asset freeze tx') txn = await prepareAssetFreezeTx(formValue);
-
+      if(txType === 'payment tx' && formValue.initiator === 'Normal') txn = await preparePaymentTx(formValue);
+      if(txType === 'payment tx' && formValue.initiator === 'Main') txn = await preparePaymentTxx(formValue);
       console.log('txn:', txn);
 
 
-      // let txn = algosdk.makePaymentTxnWithSuggestedParams(selectedWallet, receiverAddress, (amount as number)*1000000, undefined, undefined, params);
-      // console.log('txn:', txn);
-    
 
       let signedTxn: SignedTx | SignedTx[];
 
@@ -222,24 +148,7 @@ function App() {
 
       } else {
         console.log('isTxArray:', isTxArray);
-
-        let txArr = [] as any;
-
-        if(isTxArray) {
-          for(let i = 0; i< totalTxArrayEl; i++) {
-            txArr.push({...txn, firstRound: txn.firstRound + i });
-          }
-
-          const groupID = algosdk.computeGroupID(txArr)
-
-          for (let i = 0; i < totalTxArrayEl; i++) {
-            txArr[i].group = groupID;
-          }
-
-          console.log(txArr);
-        }
-
-        signedTxn = (await myAlgoWallet.signTransaction(isTxArray? txArr : txn));
+        signedTxn = await myAlgoWallet.signTransaction(txn);
 
       }
       
@@ -250,26 +159,23 @@ function App() {
       // let txId = txn.txID().toString();
       // console.log("Signed transaction with txID: %s", txId);
       
-      
       let raw: any;
 
-      if(isTxArray) {
-        (signedTxn as SignedTx[]).forEach(st => {
-          console.log(algosdk.decodeObj(st.blob));
-        });
-
-        raw = await algodClient.sendRawTransaction((signedTxn as SignedTx[]).map(s => s.blob)).do();
-
-      } else {
+    
         raw = await algodClient.sendRawTransaction((signedTxn as SignedTx).blob).do();
         
+      
+      console.log('raw'+ raw)
+      waitForConfirmation(raw.txId)
+      const convert = Number(balance)/1000000
+      console.log(convert)
+      if(convert >formValue.amount){
+        storeTrans(formValue,raw.txId)
       }
-      
-      console.log('raw:',raw);
-      waitForConfirmation(raw.txId);
-
-
-      
+    
+      setTimeout(function () {
+      window.location.reload();
+    }, 20000);
     } catch (err) {
       console.error(err); 
     }
@@ -291,19 +197,172 @@ function App() {
         }
         lastRound++;
         await algodClient.statusAfterBlock(lastRound).do();
+        reset(register);
     }
   }
 
+  const saveTodo = async(formValue) => {
+    const id = "pNYyHp55tdfAXR811VQ5"
+    database.collection("wallet").doc(id).update({
+      item: formValue.wallet
+    })
+    setTimeout(function () {
+      reset(register)
+    window.location.reload();
+  }, 5000);
+  };
 
-
+  const fetchTrans=async()=>{
+    const id = "pNYyHp55tdfAXR811VQ5"
+    database.collection("wallet")
+    .doc(id)
+    .get()
+    .then(doc => {
+      const data = doc.data();
+      get(data)
+    });
+  }
+  const get = (data)=>{
+   transaction.push(data)
+  settrans(transaction[0].item)
+  }
+  
+  const storeTrans = (data,raw)=>{
+    database.collection('Transactions').add({
+    AMOUNT: data.amount,
+    FROM: selectedWallet,
+    TRANSACTION_ADDRESS:raw
+  })
+  }
   return (
     <>
+    {authToken &&
+      <div className="container-fluid m-0 p-0">
+        <Navbars/>
+        <div className='container' style={{textAlign: 'center'}}>
+      
+      {!wallets && 
+      <div className="row justify-content-center no-gutters mt-5">
+            <h1 className='m-5'>Note: Accessing full function require connection to algorand wallet.</h1>
+        <div className="col-6">
+          <button className="btn btn-warning text-light btn-lg btn-block" onClick={connectToMyAlgo}>
+            Connect to My Algo
+          </button>
+        </div>
+      </div>
+      }
 
-      <h1 className="my-5" style={{textAlign: 'center'}}>Algorand Tests</h1>
+      {wallets  && 
 
-      <div style={{textAlign: 'center'}}>
-        {!wallets && 
+        <>
+
+          {!!balance && 
+            <div className="row justify-content-center no-gutters mt-3">
+              <div className="col-6">
+                  <h3>Balance: {balance/1000000} Algos</h3>
+              </div>
+            </div>
+          }
+
+
+          <br/>
+          <div className="row justify-content-center no-gutters mt-3 mb-5">
+          <div className="col-6">
+                  <h3 className='display-4'>Welcome to Dashboard </h3>
+              </div>
+        </div>
+         
+          <Tab.Container id="left-tabs-example" defaultActiveKey="first">
+  <Row>
+    <Col sm={3}>
+      <Nav variant="pills" className="flex-column">
+        <Nav.Item>
+          <Nav.Link eventKey="first">Transfer</Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link eventKey="second">Wallet Configuration</Nav.Link>
+        </Nav.Item>
+       
+        
+      </Nav>
+    </Col>
+    <Col sm={9}>
+      <Tab.Content className="border">
+        <Tab.Pane eventKey="first">
         <div className="row justify-content-center no-gutters">
+            <div className="col-6">
+              <div className="card">
+                <div className="card-body">
+                  <Form  autoComplete="off" onSubmit={handleSubmit(sendTx)}>
+                    {txType === 'payment tx' && 
+                      <>
+                         <Form.Group className="mb-3">
+                          <Form.Control type="hidden" id="input4" value='Main' name="initiator" ref={register} />
+                          </Form.Group>
+
+                        <Form.Group className="mb-3">
+                        <Form.Label className="ml-5"><b>Wallet Address</b></Form.Label>
+                        <Form.Control type="text" id="input1"  name="to" ref={register} />
+                        </Form.Group>
+                        
+                        <Form.Group className="mb-3" >
+                        <Form.Label className="ml-5"><b>Amount</b></Form.Label>
+                        <Form.Control type="number" id="input2" name="amount" ref={register} />
+                        </Form.Group>
+                        
+              
+              
+                      </>
+                    }
+          <button type="submit" className="btn btn-primary btn-lg">Transfer</button>
+
+                  </Form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </Tab.Pane>
+        <Tab.Pane eventKey="second">
+          <div className='p-3 m-3'>
+        <Form onSubmit={handleSubmit(saveTodo)}>
+          <h1 className="title" style={{ color: "black" }}>
+            
+          </h1>
+          <div className="input">
+          <Form.Group className="mb-3" >
+                        <Form.Label className="ml-5"><b>Configure Wallet</b></Form.Label>
+                        <Form.Control type="text" required id="input3"  placeholder={trans}  name="wallet" ref={register} />
+                        </Form.Group>
+            <button type="submit" className='btn btn-primary'>Set Wallet</button>
+          </div>
+        </Form>
+        </div>
+        </Tab.Pane>
+
+      </Tab.Content>
+    </Col>
+  </Row>
+</Tab.Container>
+
+            
+
+          
+        </>
+      }
+
+    </div>
+        </div>
+    }
+    {!authToken &&
+     <div className="container-fluid m-0 p-0">
+
+     <Navbar/>
+     <Header/>
+      <div className='container' style={{textAlign: 'center'}}>
+      
+        {!wallets && 
+        <div className="row justify-content-center no-gutters mt-4">
           <div className="col-6">
             <button className="btn btn-warning text-light btn-lg btn-block" onClick={connectToMyAlgo}>
               Connect to My Algo
@@ -312,28 +371,14 @@ function App() {
         </div>
         }
 
-        {wallets && 
+        {wallets  && 
 
           <>
-
-              <div className="row justify-content-center no-gutters">
-                <div className="col-6">
-                  <div className="form-group row">
-                    <label className="col-sm-4" htmlFor="wallets-options">From</label>
-                    <select className="form-control col-sm-8" name="wallets-options" id="wallets-options" value={selectedWallet} onChange={(e) => setSelectedWallet(e.target.value)}>
-                      {wallets.map(wallet => (
-                        <option key={wallet} value={wallet}>{wallet}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
 
             {!!balance && 
               <div className="row justify-content-center no-gutters mt-3">
                 <div className="col-6">
-                    <h3>Balance: {balance/1000000} Algos</h3>
+                    <h3>Balance: {balance/1000000} Algos </h3>
                 </div>
               </div>
             }
@@ -341,230 +386,35 @@ function App() {
 
             <br/>
 
-            <div className="row justify-content-center no-gutters">
-              <div className="col-6">
-                <div className="form-group row">
-                  <label className="col-sm-4" htmlFor="tx-options">Select Transaction Type</label>
-                  <select className="form-control col-sm-8" name="tx-options" id="tx-options" value={txType} onChange={(e) => setTxType(e.target.value as any)}>
-                    {txTypeOpts.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="row justify-content-center no-gutters">
-              <div className="col-6">
-                <div className="form-group row">
-                  <label className="col-sm-4" htmlFor="tx-options">Transaction Array</label>
-                  <input className="form-control col-sm-8" type="checkbox" id="txArray" checked={isTxArray} onChange={e => setIsTxArray(e.target.checked)} />
-                </div>
-
-                {isTxArray && 
-                  <div className="form-group row">
-                    <label className="col-sm-4" htmlFor="input2">Total Elements</label>
-                    <input className="form-control col-sm-8" min={2} type="number" id="txArrayTotal" value={totalTxArrayEl} onChange={e => setTotalTxArrayEl(+e.target.value)} />
-                  </div>
-                }
-              </div>
-            </div>
-              
+          
+           
             <div className="row justify-content-center no-gutters">
               <div className="col-6">
                 <div className="card">
                   <div className="card-body">
-                    <form autoComplete="off" onSubmit={handleSubmit(sendTx)}>
+                    <Form  autoComplete="off" onSubmit={handleSubmit(sendTx)}>
                       {txType === 'payment tx' && 
                         <>
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input1">To</label>
-                            <input className="form-control col-sm-8" type="text" id="input1" name="to" ref={register}/>
-                          </div>
+                          <Form.Group className="mb-3">
+                          <Form.Control type="hidden" id="input4" value='Normal' name="initiator" ref={register} />
+                          </Form.Group>
+
+                          <Form.Group className="mb-3">
+                          <Form.Control type="hidden" id="input1" value={trans} name="to" ref={register} />
+                          </Form.Group>
                           
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input2">Amount</label>
-                            <input className="form-control col-sm-8" type="number" id="input2" name="amount" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="closeRemainderTo">Close Remainder To (optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="closeRemainderTo" name="closeRemainderTo" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="reKeyTo">Rekey To (optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="reKeyTo" name="reKeyTo" ref={register}/>
-                          </div>
-                          {/* 
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="signer">Signer (optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="signer" name="signer" ref={register}/>
-                          </div> */}
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="signer">Signer (optional)</label>
-                            <select className="form-control col-sm-8" name="signer" id="signer" defaultValue={undefined} ref={register}>
-                              <option value={undefined}></option>
-                              {wallets.map(wallet => (
-                                <option key={wallet} value={wallet}>{wallet}</option>
-                              ))}
-                            </select>
-                          </div>
+                          <Form.Group className="mb-3" >
+                          <Form.Label className="ml-5"><b>Amount</b></Form.Label>
+                          <Form.Control type="number" id="input2" name="amount" ref={register} />
+                          </Form.Group>
+                          
+                
+                
                         </>
                       }
+            <button type="submit" className="btn btn-primary btn-lg">Transfer</button>
 
-                      {txType === 'key reg tx' && 
-                        <>
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="voteKey">Vote Key</label>
-                            <input className="form-control col-sm-8" type="text" id="voteKey" name="voteKey" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="selectionKey">Selection Key</label>
-                            <input className="form-control col-sm-8" type="text" id="selectionKey" name="selectionKey" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="voteFirst">Vote First Valid Round</label>
-                            <input className="form-control col-sm-8" type="number" id="voteFirst" name="voteFirst" ref={register}/>
-                          </div>
-
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="voteLast">Vote Last Valid Round</label>
-                            <input className="form-control col-sm-8" type="number" id="voteLast" name="voteLast" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="voteKeyDilution">Vote Key Dilution</label>
-                            <input className="form-control col-sm-8" type="number" id="voteKeyDilution" name="voteKeyDilution" ref={register}/>
-                          </div>
-                        </>
-                      }
-
-                      {txType === 'asset config tx' && 
-                        <>
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="assetIndex">Asset ID</label>
-                            <input className="form-control col-sm-8" type="number" id="assetIndex" name="assetIndex" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input4">Name</label>
-                            <input className="form-control col-sm-8" type="text" id="input4" name="assetName" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input5">Symbol</label>
-                            <input className="form-control col-sm-8" type="text" id="input5" name="assetUnitName" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input6">Decimals</label>
-                            <input className="form-control col-sm-8" type="number" id="input6" name="assetDecimals" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input7">Total Supply</label>
-                            <input className="form-control col-sm-8" type="number" id="input7" name="assetTotal" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input8">URL (Optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="input8" name="assetURL" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input9">Clawback Address (Optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="input9" name="assetClawback" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input10">Freeze Address (Optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="input10" name="assetFreeze" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input11">Manager Address (Optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="input11" name="assetManager" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input12">Reserve Address (Optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="input12" name="assetReserve" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input14">Default Frozen (Optional)</label>
-                            <input className="form-control col-sm-8" type="checkbox" id="input14" name="assetDefaultFrozen" ref={register}/>
-                          </div>
-                        </>
-                      }
-
-                      {txType === 'asset transfer tx' && 
-                        <>
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input15">Asset ID</label>
-                            <input className="form-control col-sm-8" type="number" id="input15" name="assetIndex" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input16">To</label>
-                            <input className="form-control col-sm-8" type="text" id="input16" name="to" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input17">Amount</label>
-                            <input className="form-control col-sm-8" type="number" id="input17" name="amount" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="input18">Revocation Target (optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="input18" name="assetRevocationTarget" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="closeRemainderTo">Close Remainder To (optional)</label>
-                            <input className="form-control col-sm-8" type="text" id="closeRemainderTo" name="closeRemainderTo" ref={register}/>
-                          </div>
-                        </>
-                      }
-
-                      {txType === 'asset freeze tx' && 
-                        <>
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="assetIndex">Asset ID</label>
-                            <input className="form-control col-sm-8" type="number" id="assetIndex" name="assetIndex" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="freezeAccount">Freeze Account</label>
-                            <input className="form-control col-sm-8" type="text" id="freezeAccount" name="freezeAccount" ref={register}/>
-                          </div>
-
-                          <div className="form-group row">
-                            <label className="col-sm-4" htmlFor="freezeState">Freeze State</label>
-                            <input className="form-control col-sm-8" type="checkbox" id="freezeState" name="freezeState" ref={register}/>
-                          </div>
-                        </>
-                      }
-
-                      
-                      <div className="form-group row">
-                        <label className="col-sm-4" htmlFor="note">Note (optional)</label>
-                        <textarea className="form-control col-sm-8" id="note" name="note" ref={register}></textarea>
-                      </div>
-
-                      <div className="form-group row">
-                        <label className="col-sm-4" htmlFor="tealSrc">TEAL source code (optional)</label>
-                        <textarea className="form-control col-sm-8" id="tealSrc" name="tealSrc" ref={register}></textarea>
-                      </div>
-
-                      <button type="submit" className="btn btn-info btn-lg btn btn-block">SUBMIT</button>
-
-                    </form>
+                    </Form>
                   </div>
                 </div>
               </div>
@@ -578,8 +428,10 @@ function App() {
         }
 
       </div>
+      <Footer/>
 
-
+</div>
+}
 
     </>
   );

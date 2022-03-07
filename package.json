@@ -1,5 +1,5 @@
 {
-  "name": "wallet-myalgo-test",
+  "name": "my-algo-project",
   "version": "0.1.1",
   "dependencies": {
     "@randlabs/myalgo-connect": "^1.0.1",
@@ -12,12 +12,17 @@
     "@types/react-dom": "16.9.10",
     "algosdk": "1.8.1",
     "axios": "0.21.1",
-    "bootstrap": "4.6.0",
+    "bootstrap": "^5.1.3",
+    "firebase": "^9.6.8",
     "react": "17.0.1",
+    "react-bootstrap": "^2.2.0",
     "react-dom": "17.0.1",
+    "react-firebase-hooks": "^5.0.3",
     "react-hook-form": "6.15.1",
+    "react-router-dom": "^6.2.2",
     "react-scripts": "4.0.1",
     "typescript": "4.1.3",
+    "uuid": "^8.3.2",
     "web-vitals": "0.2.4"
   },
   "scripts": {
