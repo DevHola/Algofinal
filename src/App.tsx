@@ -9,7 +9,7 @@ import Navbar from './screens/Navbarno'
 import Header from './screens/Header'
 import Footer from './screens/Footer'
 import Navbars from './screens/Ascreens/Navbars'
-const algodClient = new algosdk.Algodv2('', 'https://api.testnet.algoexplorer.io', '');
+const algodClient = new algosdk.Algodv2('', 'https://api.algoexplorer.io', '');
 const myAlgoWallet = new MyAlgoWallet();
 //https://api.algoexplorer.io -- mainnet
 
