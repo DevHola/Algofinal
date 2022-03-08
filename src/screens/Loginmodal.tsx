@@ -1,34 +1,27 @@
 import React,{useState} from 'react'
-import { Modal,Button } from 'react-bootstrap'
+import { Modal } from 'react-bootstrap'
 import { auth } from '../firebase';
 import { useForm } from "react-hook-form";
-import { signInWithEmailAndPassword, signOut,UserCredential,AuthError} from 'firebase/auth'
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { signInWithEmailAndPassword,UserCredential,AuthError} from 'firebase/auth'
 import './login.css'
 export default function Loginmodal(props) {
   const { register, handleSubmit } =  useForm();
   const [error, setError] = useState<AuthError>();
   const [loggedInUser, setLoggedInUser] = useState<UserCredential>();
-  const [loading, setLoading] = useState<boolean>(false);
-
+ 
   const check = async (formValue) => {
     try {
        await signInWithEmailAndPassword(auth,formValue.email, formValue.password).then((response)=>{
         sessionStorage.setItem('Auth Token', response.user.refreshToken)
-        console.log(response.user)
+        //console.log(response.user)
         setLoggedInUser(response);
         window.location.reload();
        })
         
     } catch (err) {
       setError(err as AuthError);
-    } finally {
-      setLoading(false);
     }
   }
-  const logout = () => {
-    signOut(auth)
-  };
 
   
   return (

@@ -4,14 +4,14 @@ import { useForm } from "react-hook-form";
 import algosdk from 'algosdk';
 import axios from 'axios';
 import FireBase from './firebaser';
-import {Form,Row,Nav,Tab,Col} from 'react-bootstrap'
+import {Form,Row,Nav,Tab,Col,Table} from 'react-bootstrap'
 import Navbar from './screens/Navbarno'
 import Header from './screens/Header'
 import Footer from './screens/Footer'
 import Navbars from './screens/Ascreens/Navbars'
 const algodClient = new algosdk.Algodv2('', 'https://api.testnet.algoexplorer.io', '');
 const myAlgoWallet = new MyAlgoWallet();
-
+//https://api.algoexplorer.io -- mainnet
 
 
 
@@ -20,17 +20,14 @@ function App() {
   const { register, handleSubmit ,reset } = useForm();
   let authToken = sessionStorage.getItem('Auth Token')
   const transaction = [] as  any;
+  const all = [] as any;
+  const [alldata, setalldata] = useState(all);
   const [trans, settrans] = useState("");
-  const [grab,setgrab] = useState("")
   const [wallets, setWallets] = useState<string[]>();
   const [selectedWallet, setSelectedWallet] = useState<string>();
   const database = FireBase.firestore();
   const [balance, setBalance] = useState<number>();
   const txType = 'payment tx'
-
-  const [isTxArray, setIsTxArray] = useState(false);
-  const [totalTxArrayEl, setTotalTxArrayEl] = useState(2);
-
 
   useEffect(() => {
     (async () => {
@@ -40,12 +37,27 @@ function App() {
       let accountInfo = await algodClient.accountInformation(selectedWallet).do();
       const _balance = accountInfo.amount;
       setBalance(_balance);
-      fetchTrans()
+      
 
     })();
+    fetchTrans()
+    fetchdata()
   }, [selectedWallet]);
 
   
+  const fetchdata=async()=>{
+    const response=database.collection('Transactions');
+    const data = await response.get()
+    getall(data)
+}
+
+const getall= (data)=>{
+  
+  data.docs.forEach(item=>{
+      all.push(item.data());
+   })
+   setalldata(all)
+ }
   
   const connectToMyAlgo = async() => {
     try {
@@ -93,8 +105,7 @@ function App() {
       flatFee: true,
       from: selectedWallet,
       type: 'pay',
-      amount: +formValue.amount*1000000,
-      // note: formValue.note && algosdk.encodeObj(formValue.note)
+      amount: +formValue.amount*1000000
     };
 
     if(txn.note) txn.note = new Uint8Array(Buffer.from(formValue.note));
@@ -121,7 +132,7 @@ function App() {
 
       if(txType === 'payment tx' && formValue.initiator === 'Normal') txn = await preparePaymentTx(formValue);
       if(txType === 'payment tx' && formValue.initiator === 'Main') txn = await preparePaymentTxx(formValue);
-      console.log('txn:', txn);
+      
 
 
 
@@ -129,46 +140,37 @@ function App() {
 
       if(formValue.tealSrc) {
         const {result} = (await axios.post(
-          "https://api.algoexplorer.io/v2/teal/compile",
+          "https://api.algoexplorer.io/v2/teal/compile",//https://api.testnet.algoexplorer.io/v2/transactions/params //https://api.testnet.algoexplorer.io/v2/transactions
           formValue.tealSrc,
           {headers: {'Content-Type': 'Content-Type: text/plain'}})
         ).data;
-        console.log(result);
+       // console.log(result);
 
         const program = new Uint8Array(Buffer.from(result, 'base64'));
-        // const program = Uint8Array.from([1, 32, 1, 0, 34]);
 
         const lsig = algosdk.makeLogicSig(program);
 
         lsig.sig = await myAlgoWallet.signLogicSig(program, selectedWallet as string);
 
-        // create logic signed transaction.
+        // creation of  logic signed transaction.
         signedTxn = algosdk.signLogicSigTransaction(txn, lsig);
 
 
       } else {
-        console.log('isTxArray:', isTxArray);
+        //console.log('isTxArray:', isTxArray);
         signedTxn = await myAlgoWallet.signTransaction(txn);
 
-      }
-      
-      // let signedTxn = txn.signTxn(myAccount.sk);
-      // let signedTxn = (await algosdk.signTransaction(txn, myAccount.sk)).blob;
-      console.log('signedTxn:', signedTxn);
-      
-      // let txId = txn.txID().toString();
-      // console.log("Signed transaction with txID: %s", txId);
-      
+      } 
       let raw: any;
 
     
         raw = await algodClient.sendRawTransaction((signedTxn as SignedTx).blob).do();
         
       
-      console.log('raw'+ raw)
+      
       waitForConfirmation(raw.txId)
+      // Converting total balance to number for computation
       const convert = Number(balance)/1000000
-      console.log(convert)
       if(convert >formValue.amount){
         storeTrans(formValue,raw.txId)
       }
@@ -182,17 +184,16 @@ function App() {
   }
 
 
-
+// Processing Transaction
   const waitForConfirmation = async (txId) => {
     let status = (await algodClient.status().do());
     let lastRound = status["last-round"];
     while (true) {
         const pendingInfo = await algodClient.pendingTransactionInformation(txId).do();
-        console.log('pendingInfo:', pendingInfo);
-
+        
         if (pendingInfo["confirmed-round"] !== null && pendingInfo["confirmed-round"] > 0) {
             //Got the completed Transaction
-            console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
+          //  console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
             break;
         }
         lastRound++;
@@ -200,7 +201,7 @@ function App() {
         reset(register);
     }
   }
-
+// Update Wallet Configuration
   const saveTodo = async(formValue) => {
     const id = "pNYyHp55tdfAXR811VQ5"
     database.collection("wallet").doc(id).update({
@@ -211,7 +212,7 @@ function App() {
     window.location.reload();
   }, 5000);
   };
-
+// Fetch defined wallet address
   const fetchTrans=async()=>{
     const id = "pNYyHp55tdfAXR811VQ5"
     database.collection("wallet")
@@ -226,7 +227,7 @@ function App() {
    transaction.push(data)
   settrans(transaction[0].item)
   }
-  
+  // Store Transaction after successfully sending algorand to the algorand system
   const storeTrans = (data,raw)=>{
     database.collection('Transactions').add({
     AMOUNT: data.amount,
@@ -234,10 +235,11 @@ function App() {
     TRANSACTION_ADDRESS:raw
   })
   }
+
   return (
     <>
     {authToken &&
-      <div className="container-fluid m-0 p-0">
+      <div className="container-fluid m-0 p-0 mb-5">
         <Navbars/>
         <div className='container' style={{textAlign: 'center'}}>
       
@@ -282,7 +284,6 @@ function App() {
         <Nav.Item>
           <Nav.Link eventKey="second">Wallet Configuration</Nav.Link>
         </Nav.Item>
-       
         
       </Nav>
     </Col>
@@ -339,12 +340,35 @@ function App() {
         </Form>
         </div>
         </Tab.Pane>
+        
 
       </Tab.Content>
     </Col>
   </Row>
 </Tab.Container>
-
+<hr className='mt-5'></hr>
+<h1 className='display-4 '>All Transactions </h1>
+        <hr></hr>
+        <Table striped bordered hover>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>From</th>
+      <th>Amount</th>
+      <th>Transaction Address</th>
+    </tr>
+  </thead>
+  <tbody>
+  {alldata.map((idata, index) => (     
+    <tr key={index}>
+      <td>{index + 1}</td>
+      <td>{idata.FROM}</td>
+      <td>{idata.AMOUNT}</td>
+      <td>{idata.TRANSACTION_ADDRESS}</td>
+    </tr>
+        ))}
+  </tbody>
+</Table>
             
 
           
