@@ -9,12 +9,12 @@ import Navbar from './screens/Navbarno'
 import Header from './screens/Header'
 import Footer from './screens/Footer'
 import Navbars from './screens/Ascreens/Navbars'
+import { toast } from 'react-toastify';
+  import 'react-toastify/dist/ReactToastify.css';
 const algodClient = new algosdk.Algodv2('', 'https://api.algoexplorer.io', '');
 const myAlgoWallet = new MyAlgoWallet();
 //https://api.algoexplorer.io -- mainnet
-
-
-
+toast.configure()
 
 function App() {
   const { register, handleSubmit ,reset } = useForm();
@@ -50,6 +50,11 @@ function App() {
     const data = await response.get()
     getall(data)
 }
+
+const notify = () => toast("Transfer Processing. Page reload initating on Tranasction Completed");
+const walletset = () => toast("Wallet Configured");
+
+
 
 const getall= (data)=>{
   
@@ -122,6 +127,8 @@ const getall= (data)=>{
 
 
   const sendTx = async(formValue) => {
+    const convert = Number(balance)/1000000
+    if(convert >formValue.amount){
     try {
 
       Object.keys(formValue).forEach(key => {
@@ -168,19 +175,23 @@ const getall= (data)=>{
         
       
       
-      waitForConfirmation(raw.txId)
+     // waitForConfirmation(raw.txId)
       // Converting total balance to number for computation
-      const convert = Number(balance)/1000000
-      if(convert >formValue.amount){
+        waitForConfirmation(raw.txId)
         storeTrans(formValue,raw.txId)
-      }
-    
+      
+      notify()
+      reset(register);
       setTimeout(function () {
       window.location.reload();
-    }, 20000);
+    }, 10000);
     } catch (err) {
-      console.error(err); 
+      reset(register);
+      toast("Transaction failed to process")
     }
+  }else{
+    toast("Over-Spending detected. !Amount Greater than balance")
+  }
   }
 
 
@@ -193,7 +204,7 @@ const getall= (data)=>{
         
         if (pendingInfo["confirmed-round"] !== null && pendingInfo["confirmed-round"] > 0) {
             //Got the completed Transaction
-          //  console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
+            console.log("Transaction " + txId + " confirmed in round " + pendingInfo["confirmed-round"]);
             break;
         }
         lastRound++;
@@ -207,6 +218,7 @@ const getall= (data)=>{
     database.collection("wallet").doc(id).update({
       item: formValue.wallet
     })
+    walletset()
     setTimeout(function () {
       reset(register)
     window.location.reload();
@@ -239,6 +251,7 @@ const getall= (data)=>{
   return (
     <>
     {authToken &&
+    
       <div className="container-fluid m-0 p-0 mb-5">
         <Navbars/>
         <div className='container' style={{textAlign: 'center'}}>
