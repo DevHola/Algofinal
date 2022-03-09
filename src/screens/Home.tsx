@@ -11,9 +11,9 @@ import Footer from './Footer'
 import Navbars from './Ascreens/Navbars'
 import { toast } from 'react-toastify';
   import 'react-toastify/dist/ReactToastify.css';
-const algodClient = new algosdk.Algodv2('', 'https://api.testnet.algoexplorer.io', '');
+const algodClient = new algosdk.Algodv2('', '//https://api.algoexplorer.io', '');
 const myAlgoWallet = new MyAlgoWallet();
-//https://api.algoexplorer.io -- mainnet
+//https://api.algoexplorer.io -- mainnet https://api.testnet.algoexplorer.io
 toast.configure()
 
 function Home() {
