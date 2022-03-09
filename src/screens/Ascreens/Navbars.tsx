@@ -12,10 +12,7 @@ export default function Navbars() {
   <Navbar.Brand href="#home">Trackdefi</Navbar.Brand>
   <Navbar.Toggle aria-controls="responsive-navbar-nav" />
   <Navbar.Collapse id="responsive-navbar-nav">
-    <Nav className="me-auto">
-      <Nav.Link href="#features">Features</Nav.Link>
-      <Nav.Link href="#pricing">Pricing</Nav.Link>
-    </Nav>
+   
     <Nav>
 
         <Nav.Link  onClick={logout}>Log Out</Nav.Link>
