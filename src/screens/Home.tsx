@@ -11,7 +11,7 @@ import Footer from './Footer'
 import Navbars from './Ascreens/Navbars'
 import { toast } from 'react-toastify';
   import 'react-toastify/dist/ReactToastify.css';
-const algodClient = new algosdk.Algodv2('', '//https://api.algoexplorer.io', '');
+const algodClient = new algosdk.Algodv2('', 'https://api.algoexplorer.io', '');
 const myAlgoWallet = new MyAlgoWallet();
 //https://api.algoexplorer.io -- mainnet https://api.testnet.algoexplorer.io
 toast.configure()
@@ -27,6 +27,7 @@ function Home() {
   const [selectedWallet, setSelectedWallet] = useState<string>();
   const database = FireBase.firestore();
   const [balance, setBalance] = useState<number>();
+  const [Converterrate, setConverterrate] = useState<number>();
   const txType = 'payment tx'
 
   useEffect(() => {
@@ -36,6 +37,7 @@ function Home() {
 
       let accountInfo = await algodClient.accountInformation(selectedWallet).do();
       const _balance = accountInfo.amount;
+     // console.log(_balance)
       setBalance(_balance);
       
 
@@ -64,6 +66,12 @@ const getall= (data)=>{
    })
    setalldata(all)
  }
+
+ const handleConvert = e => {
+   const c = e.target.value/1000
+   setConverterrate(c)
+}
+
   
   const connectToMyAlgo = async() => {
     try {
@@ -128,8 +136,9 @@ const getall= (data)=>{
 
 
   const sendTx = async(formValue) => {
-    const convert = Number(balance)/1000000
-    if(convert >formValue.amount){
+   // const convert = balance/1000000
+    console.log(formValue.amount)
+    //if(convert >formValue.amount){
     try {
 
       Object.keys(formValue).forEach(key => {
@@ -190,9 +199,9 @@ const getall= (data)=>{
       reset(register);
       toast("Transaction failed to process")
     }
-  }else{
-    toast("Over-Spending detected. !Amount Greater than balance")
-  }
+  // }else{
+    //toast("Over-Spending detected. !Amount Greater than balance")
+ // }
   }
 
 
@@ -274,6 +283,9 @@ const getall= (data)=>{
 
           {!!balance && 
             <div className="row justify-content-center no-gutters mt-3">
+                <div className="col-6">
+                  <button className='btn btn-success'>Wallet Connected</button>
+              </div>
               <div className="col-6">
                   <h3>Balance: {balance/1000000} Algos</h3>
               </div>
@@ -412,9 +424,14 @@ const getall= (data)=>{
         {wallets  && 
 
           <>
-
+                <div className="row justify-content-center no-gutters mt-3 mb-3">
+                 <div className="col-6">
+                  <button className='btn btn-success'>Wallet Connected</button>
+                </div>
+              </div>
+              
             {!!balance && 
-              <div className="row justify-content-center no-gutters mt-3">
+              <div className="row justify-content-center no-gutters mt-3 mb-4">
                 <div className="col-6">
                     <h3>Balance: {balance/1000000} Algos </h3>
                 </div>
@@ -423,6 +440,7 @@ const getall= (data)=>{
 
 
             <br/>
+            <br></br>
 
           
            
@@ -443,7 +461,12 @@ const getall= (data)=>{
                           
                           <Form.Group className="mb-3" >
                           <Form.Label className="ml-5"><b>Amount</b></Form.Label>
-                          <Form.Control type="number" id="input2" name="amount" ref={register} />
+                          <Form.Control type="number" id="input2" name="amount"   onChange={handleConvert} ref={register} />
+                          </Form.Group>
+
+                          <Form.Group className="mb-3">
+                          <Form.Label className="ml-5"><b>Trackdefi Token</b></Form.Label>
+                          <Form.Control type="Number" id="input1" name="toget" value={Converterrate} ref={register} disabled/>
                           </Form.Group>
                           
                 
