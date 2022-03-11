@@ -281,16 +281,6 @@ const getall= (data)=>{
 
         <>
 
-          {!!balance && 
-            <div className="row justify-content-center no-gutters mt-3">
-                <div className="col-6">
-                  <button className='btn btn-success'>Wallet Connected</button>
-              </div>
-              <div className="col-6">
-                  <h3>Balance: {balance/1000000} Algos</h3>
-              </div>
-            </div>
-          }
 
 
           <br/>
@@ -299,6 +289,17 @@ const getall= (data)=>{
                   <h3 className='display-4'>Welcome to Dashboard </h3>
               </div>
         </div>
+        
+        {!!balance && 
+            <div className="row justify-content-center no-gutters mt-3 mb-5">
+                <div className="col-6">
+                  <button className='btn btn-success'>Wallet Connected</button>
+              </div>
+              <div className="col-6">
+                  <h3>Balance: {balance/1000000} Algos</h3>
+              </div>
+            </div>
+          }
          
           <Tab.Container id="left-tabs-example" defaultActiveKey="first">
   <Row>
