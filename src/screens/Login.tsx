@@ -36,7 +36,7 @@ export default function Login() {
       <div className='container loger'>
     <Container>
       <div className='row'>
-      <div className="col-4 timer mt-5"><h1 className="m-5 p-5 "><b>Trackdefi</b></h1>
+      <div className="col-4 timer mt-5 d-none d-md-block"><h1 className="m-5 p-5 "><b>Trackdefi</b></h1>
       </div>
         <div className="col-sm p-3">
         <div className='col p-5 shadow turn mb-5'>
