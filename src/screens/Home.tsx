@@ -6,7 +6,7 @@ import './home.css'
 import ReactDatatable from '@ashvin27/react-datatable';
 import axios from 'axios';
 import FireBase from '../firebaser';
-import {Form,Row,Nav,Tab,Col,Table} from 'react-bootstrap'
+import {Form,Row,Nav,Tab,Col} from 'react-bootstrap'
 import Navbar from './Navbarno'
 import Header from './Header'
 import Footer from './Footer'
@@ -31,6 +31,15 @@ function Home() {
   const [balance, setBalance] = useState<number>();
   const [Converterrate, setConverterrate] = useState<number>();
   const txType = 'payment tx'
+  useEffect(() => {
+    fetchdata()
+   
+ })
+
+ useEffect(() => {
+  fetchTrans()
+ 
+})
 
   useEffect(() => {
     (async () => {
@@ -44,30 +53,11 @@ function Home() {
       
 
     })();
-    fetchTrans()
-    fetchdata()
+   
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedWallet]);
 
   
-  const fetchdata=async()=>{
-    const response=database.collection('Transactions');
-    const data = await response.get()
-    getall(data)
-}
-
-const notify = () => toast("Transfer Processing. Page reload initating on Tranasction Completed");
-const walletset = () => toast("Wallet Configured");
-
-
-
-const getall= (data)=>{
-  
-  data.docs.forEach(item=>{
-      all.push(item.data());
-   })
-   setalldata(all)
- }
 
  const handleConvert = e => {
    const c = e.target.value/1000
@@ -282,8 +272,27 @@ const config = {
     FROM: selectedWallet,
     TRANSACTION_ADDRESS:raw
   })
+  
   }
+  
+  const fetchdata=async()=>{
+    const response=database.collection('Transactions');
+    const data = await response.get()
+    getall(data)
+}
 
+const notify = () => toast("Transfer Processing. Page reload initating on Tranasction Completed");
+const walletset = () => toast("Wallet Configured");
+
+
+
+const getall= (data)=>{
+  
+  data.docs.forEach(item=>{
+      all.push(item.data());
+   })
+   setalldata(all)
+ }
   return (
     <>
     {authToken &&
@@ -292,18 +301,7 @@ const config = {
         <Navbars/>
         <div className='container' style={{textAlign: 'center'}}>
       
-      {!wallets && 
-      <div className="row justify-content-center no-gutters mt-5">
-            <h1 className='m-5'>Note: Accessing full function require connection to algorand wallet.</h1>
-        <div className="col-6">
-          <button className="btn btn-warning text-light btn-lg btn-block" onClick={connectToMyAlgo}>
-            Connect to My Algo
-          </button>
-        </div>
-      </div>
-      }
 
-      {wallets  && 
 
         <>
 
@@ -315,69 +313,21 @@ const config = {
                   <h3 className='display-4'>Welcome to Dashboard </h3>
               </div>
         </div>
-        
-        {!!balance && 
-            <div className="row justify-content-center no-gutters mt-3 mb-5">
-                <div className="col-6">
-                  <button className='btn btn-success'>Wallet Connected</button>
-              </div>
-              <div className="col-6">
-                  <h3>Balance: {balance/1000000} Algos</h3>
-              </div>
-            </div>
-          }
          
           <Tab.Container id="left-tabs-example" defaultActiveKey="first">
   <Row>
     <Col sm={3}>
       <Nav variant="pills" className="flex-column">
         <Nav.Item>
-          <Nav.Link eventKey="first">Transfer</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link eventKey="second">Wallet Configuration</Nav.Link>
+          <Nav.Link eventKey="first">Wallet Configuration</Nav.Link>
         </Nav.Item>
         
       </Nav>
     </Col>
     <Col sm={9}>
       <Tab.Content className="border">
+       
         <Tab.Pane eventKey="first">
-        <div className="row justify-content-center no-gutters">
-            <div className="col-6">
-              <div className="card">
-                <div className="card-body">
-                  <Form  autoComplete="off" onSubmit={handleSubmit(sendTx)}>
-                    {txType === 'payment tx' && 
-                      <>
-                         <Form.Group className="mb-3">
-                          <Form.Control type="hidden" id="input4" value='Main' name="initiator" ref={register} />
-                          </Form.Group>
-
-                        <Form.Group className="mb-3">
-                        <Form.Label className="ml-5"><b>Wallet Address</b></Form.Label>
-                        <Form.Control type="text" id="input1"  name="to" ref={register} />
-                        </Form.Group>
-                        
-                        <Form.Group className="mb-3" >
-                        <Form.Label className="ml-5"><b>Amount</b></Form.Label>
-                        <Form.Control type="number" id="input2" name="amount" ref={register} />
-                        </Form.Group>
-                        
-              
-              
-                      </>
-                    }
-          <button type="submit" className="btn btn-primary btn-lg">Transfer</button>
-
-                  </Form>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </Tab.Pane>
-        <Tab.Pane eventKey="second">
           <div className='p-3 m-3'>
         <Form onSubmit={handleSubmit(saveTodo)}>
           <h1 className="title" style={{ color: "black" }}>
@@ -411,7 +361,7 @@ const config = {
 
           
         </>
-      }
+      
 
     </div>
         </div>
