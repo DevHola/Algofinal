@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import MyAlgoWallet, { SignedTx } from '@randlabs/myalgo-connect';
 import { useForm } from "react-hook-form";
 import algosdk from 'algosdk';
+import './home.css'
 import axios from 'axios';
 import FireBase from '../firebaser';
 import {Form,Row,Nav,Tab,Col,Table} from 'react-bootstrap'
@@ -262,7 +263,7 @@ const getall= (data)=>{
     <>
     {authToken &&
     
-      <div className="container-fluid m-0 p-0 mb-5">
+      <div className="container-fluid m-0 p-0 mb-5" style={{ height: '70px' }}>
         <Navbars/>
         <div className='container' style={{textAlign: 'center'}}>
       
@@ -406,7 +407,7 @@ const getall= (data)=>{
         </div>
     }
     {!authToken &&
-     <div className="container-fluid m-0 p-0">
+     <div className="container-fluid m-0 p-0 moris" >
 
      <Navbar/>
      <Header/>

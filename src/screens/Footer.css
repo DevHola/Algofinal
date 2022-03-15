@@ -1,11 +1,13 @@
 .footer{
 
-        position: fixed;
+        position: relative;
         width: 100%;
         left: 0;
         bottom: 0;
-        color: maroon;
+        margin-top: 200px;
+        height: 10px;
+        color: black;
         text-align: center;
-        background-color: green;
+        background-color: whitesmoke
         
 }
