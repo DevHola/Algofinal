@@ -3,6 +3,7 @@ import MyAlgoWallet, { SignedTx } from '@randlabs/myalgo-connect';
 import { useForm } from "react-hook-form";
 import algosdk from 'algosdk';
 import './home.css'
+import ReactDatatable from '@ashvin27/react-datatable';
 import axios from 'axios';
 import FireBase from '../firebaser';
 import {Form,Row,Nav,Tab,Col,Table} from 'react-bootstrap'
@@ -73,6 +74,30 @@ const getall= (data)=>{
    setConverterrate(c)
 }
 
+const columns = [{  
+  key: "FROM",
+  text: "FROM"
+ }
+ ,{  
+  key: 'AMOUNT',  
+  text: 'AMOUNT' ,
+  }
+ 
+ ,{  
+ key: 'TRANSACTION_ADDRESS',  
+ text: 'TRANSACTION_ADDRESS' ,
+ }
+]
+const config = {
+  page_size: 10,
+  length_menu: [10, 20, 50],
+  show_filter: true,
+  show_pagination: true,
+  button: {
+      excel: true,
+      print: true
+  }
+}
   
   const connectToMyAlgo = async() => {
     try {
@@ -377,26 +402,11 @@ const getall= (data)=>{
 <hr className='mt-5'></hr>
 <h1 className='display-4 '>All Transactions </h1>
         <hr></hr>
-        <Table striped bordered hover>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>From</th>
-      <th>Amount</th>
-      <th>Transaction Address</th>
-    </tr>
-  </thead>
-  <tbody>
-  {alldata.map((idata, index) => (     
-    <tr key={index}>
-      <td>{index + 1}</td>
-      <td>{idata.FROM}</td>
-      <td>{idata.AMOUNT}</td>
-      <td>{idata.TRANSACTION_ADDRESS}</td>
-    </tr>
-        ))}
-  </tbody>
-</Table>
+        <ReactDatatable 
+      config={config}
+      records={alldata}  
+      columns={columns}  
+   />
             
 
           
