@@ -69,15 +69,18 @@ function Home() {
     {
       key: "FROM",
       text: "FROM",
+      sortable: true,
     },
     {
       key: "AMOUNT",
       text: "AMOUNT",
+      sortable: true,
     },
 
     {
       key: "TRANSACTION_ADDRESS",
       text: "TRANSACTION_ADDRESS",
+      sortable: true,
     },
   ];
   const config = {
