@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
-import firebase from "firebase/compat/app"
-import 'firebase/compat/firestore'
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -13,9 +13,9 @@ const firebaseConfig = {
   storageBucket: "airdrop-85583.appspot.com",
   messagingSenderId: "1007856079528",
   appId: "1:1007856079528:web:c6b6cd712ffab3fcd4a89d",
-  measurementId: "G-H8V56PSH2G"
+  measurementId: "G-H8V56PSH2G",
 };
 
 // Initialize Firebase
-const FireBase =firebase.initializeApp(firebaseConfig);
-export default FireBase
+const FireBase = firebase.initializeApp(firebaseConfig);
+export default FireBase;

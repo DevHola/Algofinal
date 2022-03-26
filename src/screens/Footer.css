@@ -1,13 +1,11 @@
-.footer{
-
-        position: relative;
-        width: 100%;
-        left: 0;
-        bottom: 0;
-        margin-top: 200px;
-        height: 10px;
-        color: black;
-        text-align: center;
-        background-color: whitesmoke
-        
+.footer {
+  position: relative;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  margin-top: 200px;
+  height: 10px;
+  color: white;
+  text-align: center;
+  background-color: whitesmoke;
 }

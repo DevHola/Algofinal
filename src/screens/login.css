@@ -1,14 +1,24 @@
-.loger{
-        width:auto !important; 
-        left: 0;
-        bottom: 0;
-        margin-top: 130px;
-        background-color:white;
+.loger {
+  width: auto !important;
+  left: 0;
+  bottom: 0;
+  margin-top: 130px;
+  background-color: white;
 }
-  
+
 .timer {
-        border-right: 2px solid whitesmoke
+  border-right: 2px solid whitesmoke;
+  margin-bottom: 65px !important;
 }
-.turn{
-        border-radius: 10px;
+.turn {
+  border-radius: 10px;
+}
+.dj {
+  background-color: black;
+}
+.time {
+  border-color: white;
+}
+.demon {
+  background-color: #25d366 !important;
 }
