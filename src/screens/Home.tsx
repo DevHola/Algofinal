@@ -356,7 +356,7 @@ function Home() {
               <hr className="mt-5"></hr>
               <h1 className="display-4 text-white ">All Transactions </h1>
               <hr className="temper"></hr>
-              <div className="bg-white p-5 m-5">
+              <div className="bg-white p-5 ">
                 <ReactDatatable
                   config={config}
                   records={alldata}
