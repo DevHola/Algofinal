@@ -34,11 +34,11 @@ function Home() {
   const [Converterrate, setConverterrate] = useState<number>();
   const txType = "payment tx";
   useEffect(() => {
-    fetchdata();
+   // fetchdata();
   });
 
   useEffect(() => {
-    fetchTrans();
+    //fetchTrans();
   });
 
   useEffect(() => {
