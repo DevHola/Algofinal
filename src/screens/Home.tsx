@@ -401,11 +401,6 @@ function Home() {
                           Balance: {balance / 1000000} Algos{" "}
                         </h3>
                       )}
-                      {balance === 0 && (
-                        <h3 className="text-white">
-                          You currently have no Algorand in Your Wallet
-                        </h3>
-                      )}
                     </div>
                   </div>
                 )}
