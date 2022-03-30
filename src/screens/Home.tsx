@@ -25,6 +25,7 @@ function Home() {
   const transaction = [] as any;
   const [show, setshow] = useState(false);
   const all = [] as any;
+  const [checker, setchecker] = useState(false);
   const [alldata, setalldata] = useState(all);
   const [trans, settrans] = useState("");
   const [wallets, setWallets] = useState<string[]>();
@@ -49,8 +50,11 @@ function Home() {
         .accountInformation(selectedWallet)
         .do();
       const _balance = accountInfo.amount;
-      console.log(_balance)
+      //console.log(_balance)
       setBalance(_balance);
+       if (_balance === 0) {
+        setchecker(true);
+      }
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -399,6 +403,17 @@ function Home() {
                       {balance > 0 && (
                         <h3 className="text-white">
                           Balance: {balance / 1000000} Algos{" "}
+                        </h3>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {checker && (
+                  <div className="row justify-content-center no-gutters mt-3 mb-4">
+                    <div className="col-6">
+                      {checker === true && (
+                        <h3 className="text-white">
+                          You currently have 0 Algo in Your Wallet
                         </h3>
                       )}
                     </div>
