@@ -49,7 +49,7 @@ function Home() {
         .accountInformation(selectedWallet)
         .do();
       const _balance = accountInfo.amount;
-      // console.log(_balance)
+      console.log(_balance)
       setBalance(_balance);
     })();
 
